@@ -1,98 +1,253 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { CharacterCard } from '@/components/character-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
+  const nintendoRed = '#E60012';
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
+  // Esempi di personaggi - da sostituire con dati reali
+  const featuredCharacters = [
+    { name: 'Mario', series: 'Super Mario', difficulty: 'Easy' as const },
+    { name: 'Link', series: 'The Legend of Zelda', difficulty: 'Medium' as const },
+    { name: 'Pikachu', series: 'Pokémon', difficulty: 'Easy' as const },
+    { name: 'Cloud', series: 'Final Fantasy', difficulty: 'Hard' as const },
+  ];
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ThemedView style={styles.background} lightColor="#FFFFFF" darkColor="#FFFFFF">
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <ThemedView style={styles.header} lightColor="transparent" darkColor="transparent">
+            <View style={styles.logoContainer}>
+              <View style={styles.logoCircle}>
+                <FontAwesome5 name="users" size={32} color={nintendoRed} solid />
+              </View>
+            </View>
+            <ThemedText type="title" style={styles.title}>
+              Smash Group
+            </ThemedText>
+            <ThemedText style={styles.subtitle}>
+              Unisciti alla community e trova altri giocatori per sfide epiche!
+            </ThemedText>
+          </ThemedView>
+
+          {/* Sezione descrizione app */}
+          <ThemedView style={styles.heroSection} lightColor="transparent" darkColor="transparent">
+            <ThemedView style={styles.heroCard} lightColor={nintendoRed} darkColor={nintendoRed}>
+              <View style={styles.heroContent}>
+                <FontAwesome5 name="gamepad" size={40} color="#FFFFFF" solid style={styles.heroIcon} />
+                <ThemedText type="defaultSemiBold" style={styles.heroTitle}>
+                  Incontra Giocatori
+                </ThemedText>
+                <ThemedText style={styles.heroText}>
+                  Trova altri giocatori di Super Smash Bros nelle tue vicinanze e organizza sessioni di gioco insieme
+                </ThemedText>
+              </View>
+            </ThemedView>
+          </ThemedView>
+
+          {/* Funzionalità */}
+          <ThemedView style={styles.section} lightColor="transparent" darkColor="transparent">
+            <ThemedText type="subtitle" style={styles.sectionTitle}>
+              Come Funziona
+            </ThemedText>
+            <View style={styles.featuresContainer}>
+              <ThemedView style={styles.featureCardWhite}>
+                <View style={styles.featureIconContainer}>
+                  <FontAwesome5 name="user-friends" size={24} color={nintendoRed} solid />
+                </View>
+                <ThemedText type="defaultSemiBold" style={styles.featureTitleBlack}>
+                  Crea Gruppi
+                </ThemedText>
+                <ThemedText style={styles.featureTextBlack}>
+                  Crea o unisciti a gruppi di giocatori nella tua zona
+                </ThemedText>
+              </ThemedView>
+
+              <ThemedView style={styles.featureCardWhite}>
+                <View style={styles.featureIconContainer}>
+                  <FontAwesome5 name="heart" size={24} color={nintendoRed} solid />
+                </View>
+                <ThemedText type="defaultSemiBold" style={styles.featureTitleBlack}>
+                  Scegli il Tuo Main
+                </ThemedText>
+                <ThemedText style={styles.featureTextBlack}>
+                  Mostra i tuoi personaggi preferiti e trova giocatori con stili simili
+                </ThemedText>
+              </ThemedView>
+
+              <ThemedView style={styles.featureCardWhite}>
+                <View style={styles.featureIconContainer}>
+                  <FontAwesome5 name="trophy" size={24} color={nintendoRed} solid />
+                </View>
+                <ThemedText type="defaultSemiBold" style={styles.featureTitleBlack}>
+                  Sfide e Tornei
+                </ThemedText>
+                <ThemedText style={styles.featureTextBlack}>
+                  Partecipa a sfide amichevoli e tornei organizzati dalla community
+                </ThemedText>
+              </ThemedView>
+            </View>
+          </ThemedView>
+
+          {/* Personaggi popolari */}
+          <ThemedView style={styles.section} lightColor="transparent" darkColor="transparent">
+            <ThemedText type="subtitle" style={styles.sectionTitle}>
+              Personaggi Popolari
+            </ThemedText>
+            <View style={styles.cardsContainer}>
+              {featuredCharacters.map((character, index) => (
+                <CharacterCard
+                  key={index}
+                  name={character.name}
+                  series={character.series}
+                  difficulty={character.difficulty}
+                  onPress={() => {
+                    // Navigazione al dettaglio personaggio
+                    console.log(`Apri dettaglio ${character.name}`);
+                  }}
+                />
+              ))}
+            </View>
+          </ThemedView>
+
+        </ScrollView>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
+  background: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  header: {
+    marginBottom: 32,
     gap: 8,
+    alignItems: 'center',
+  },
+  logoContainer: {
+    marginBottom: 16,
+  },
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#E60012',
+  },
+  title: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    color: '#000000',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#000000',
+    opacity: 0.7,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  heroSection: {
+    marginBottom: 32,
+  },
+  heroCard: {
+    borderRadius: 20,
+    padding: 24,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  heroContent: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  heroIcon: {
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  heroTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  heroText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    lineHeight: 24,
+    opacity: 0.95,
+  },
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 16,
+  },
+  cardsContainer: {
+    gap: 12,
+  },
+  featuresContainer: {
+    gap: 16,
+  },
+  featureCardWhite: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#E60012',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  featureIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#FFF5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  featureTitleBlack: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  featureTextBlack: {
+    fontSize: 14,
+    color: '#000000',
+    opacity: 0.7,
+    lineHeight: 20,
   },
 });

@@ -1,112 +1,278 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState, useEffect } from 'react';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { CharacterCard } from '@/components/character-card';
+import { Colors } from '@/constants/theme';
+import { GlobalFont } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function TabTwoScreen() {
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://UR-IP:3000/api';
+
+export default function CharactersScreen() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
+  const { token, isLoggedIn } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [likedCharacters, setLikedCharacters] = useState<Set<string>>(new Set());
+  const [likeCounts, setLikeCounts] = useState<{ [key: string]: number }>({});
+
+  // Lista completa personaggi - da sostituire con dati reali
+  const allCharacters = [
+    { name: 'Mario', series: 'Super Mario', difficulty: 'Easy' as const },
+    { name: 'Donkey Kong', series: 'Donkey Kong', difficulty: 'Medium' as const },
+    { name: 'Link', series: 'The Legend of Zelda', difficulty: 'Medium' as const },
+    { name: 'Samus', series: 'Metroid', difficulty: 'Medium' as const },
+    { name: 'Yoshi', series: 'Yoshi', difficulty: 'Easy' as const },
+    { name: 'Kirby', series: 'Kirby', difficulty: 'Easy' as const },
+    { name: 'Fox', series: 'Star Fox', difficulty: 'Hard' as const },
+    { name: 'Pikachu', series: 'Pokémon', difficulty: 'Easy' as const },
+    { name: 'Luigi', series: 'Super Mario', difficulty: 'Easy' as const },
+    { name: 'Ness', series: 'EarthBound', difficulty: 'Hard' as const },
+    { name: 'Captain Falcon', series: 'F-Zero', difficulty: 'Medium' as const },
+    { name: 'Jigglypuff', series: 'Pokémon', difficulty: 'Medium' as const },
+    { name: 'Peach', series: 'Super Mario', difficulty: 'Medium' as const },
+    { name: 'Bowser', series: 'Super Mario', difficulty: 'Medium' as const },
+    { name: 'Ice Climbers', series: 'Ice Climber', difficulty: 'Hard' as const },
+    { name: 'Sheik', series: 'The Legend of Zelda', difficulty: 'Hard' as const },
+    { name: 'Zelda', series: 'The Legend of Zelda', difficulty: 'Medium' as const },
+    { name: 'Dr. Mario', series: 'Super Mario', difficulty: 'Easy' as const },
+    { name: 'Pichu', series: 'Pokémon', difficulty: 'Hard' as const },
+    { name: 'Falco', series: 'Star Fox', difficulty: 'Hard' as const },
+    { name: 'Marth', series: 'Fire Emblem', difficulty: 'Medium' as const },
+    { name: 'Young Link', series: 'The Legend of Zelda', difficulty: 'Medium' as const },
+    { name: 'Ganondorf', series: 'The Legend of Zelda', difficulty: 'Hard' as const },
+    { name: 'Mewtwo', series: 'Pokémon', difficulty: 'Hard' as const },
+    { name: 'Roy', series: 'Fire Emblem', difficulty: 'Medium' as const },
+    { name: 'Mr. Game & Watch', series: 'Game & Watch', difficulty: 'Hard' as const },
+    { name: 'Meta Knight', series: 'Kirby', difficulty: 'Hard' as const },
+    { name: 'Pit', series: 'Kid Icarus', difficulty: 'Medium' as const },
+    { name: 'Zero Suit Samus', series: 'Metroid', difficulty: 'Hard' as const },
+    { name: 'Wario', series: 'Wario', difficulty: 'Medium' as const },
+    { name: 'Snake', series: 'Metal Gear', difficulty: 'Hard' as const },
+    { name: 'Ike', series: 'Fire Emblem', difficulty: 'Medium' as const },
+    { name: 'Pokémon Trainer', series: 'Pokémon', difficulty: 'Hard' as const },
+    { name: 'Diddy Kong', series: 'Donkey Kong', difficulty: 'Hard' as const },
+    { name: 'Sonic', series: 'Sonic the Hedgehog', difficulty: 'Medium' as const },
+    { name: 'King Dedede', series: 'Kirby', difficulty: 'Medium' as const },
+    { name: 'Olimar', series: 'Pikmin', difficulty: 'Hard' as const },
+    { name: 'Lucario', series: 'Pokémon', difficulty: 'Medium' as const },
+    { name: 'R.O.B.', series: 'R.O.B.', difficulty: 'Hard' as const },
+    { name: 'Toon Link', series: 'The Legend of Zelda', difficulty: 'Medium' as const },
+    { name: 'Wolf', series: 'Star Fox', difficulty: 'Hard' as const },
+    { name: 'Villager', series: 'Animal Crossing', difficulty: 'Hard' as const },
+    { name: 'Mega Man', series: 'Mega Man', difficulty: 'Medium' as const },
+    { name: 'Wii Fit Trainer', series: 'Wii Fit', difficulty: 'Medium' as const },
+    { name: 'Rosalina & Luma', series: 'Super Mario', difficulty: 'Hard' as const },
+    { name: 'Little Mac', series: 'Punch-Out!!', difficulty: 'Medium' as const },
+    { name: 'Greninja', series: 'Pokémon', difficulty: 'Hard' as const },
+    { name: 'Palutena', series: 'Kid Icarus', difficulty: 'Medium' as const },
+    { name: 'Pac-Man', series: 'Pac-Man', difficulty: 'Hard' as const },
+    { name: 'Robin', series: 'Fire Emblem', difficulty: 'Hard' as const },
+    { name: 'Shulk', series: 'Xenoblade Chronicles', difficulty: 'Hard' as const },
+    { name: 'Bowser Jr.', series: 'Super Mario', difficulty: 'Medium' as const },
+    { name: 'Duck Hunt', series: 'Duck Hunt', difficulty: 'Hard' as const },
+    { name: 'Ryu', series: 'Street Fighter', difficulty: 'Hard' as const },
+    { name: 'Ken', series: 'Street Fighter', difficulty: 'Hard' as const },
+    { name: 'Cloud', series: 'Final Fantasy', difficulty: 'Medium' as const },
+    { name: 'Corrin', series: 'Fire Emblem', difficulty: 'Hard' as const },
+    { name: 'Bayonetta', series: 'Bayonetta', difficulty: 'Hard' as const },
+    { name: 'Inkling', series: 'Splatoon', difficulty: 'Medium' as const },
+    { name: 'Ridley', series: 'Metroid', difficulty: 'Medium' as const },
+    { name: 'Simon', series: 'Castlevania', difficulty: 'Medium' as const },
+    { name: 'Richter', series: 'Castlevania', difficulty: 'Medium' as const },
+    { name: 'King K. Rool', series: 'Donkey Kong', difficulty: 'Medium' as const },
+    { name: 'Isabelle', series: 'Animal Crossing', difficulty: 'Medium' as const },
+    { name: 'Incineroar', series: 'Pokémon', difficulty: 'Medium' as const },
+    { name: 'Piranha Plant', series: 'Super Mario', difficulty: 'Hard' as const },
+    { name: 'Joker', series: 'Persona', difficulty: 'Hard' as const },
+    { name: 'Hero', series: 'Dragon Quest', difficulty: 'Hard' as const },
+    { name: 'Banjo & Kazooie', series: 'Banjo-Kazooie', difficulty: 'Medium' as const },
+    { name: 'Terry', series: 'Fatal Fury', difficulty: 'Hard' as const },
+    { name: 'Byleth', series: 'Fire Emblem', difficulty: 'Medium' as const },
+    { name: 'Min Min', series: 'ARMS', difficulty: 'Hard' as const },
+    { name: 'Steve', series: 'Minecraft', difficulty: 'Hard' as const },
+    { name: 'Sephiroth', series: 'Final Fantasy', difficulty: 'Hard' as const },
+    { name: 'Pyra/Mythra', series: 'Xenoblade Chronicles', difficulty: 'Hard' as const },
+    { name: 'Kazuya', series: 'Tekken', difficulty: 'Hard' as const },
+    { name: 'Sora', series: 'Kingdom Hearts', difficulty: 'Medium' as const },
+  ];
+
+  const filteredCharacters = allCharacters.filter(
+    (char) =>
+      char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      char.series.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  useEffect(() => {
+    if (isLoggedIn && token) {
+      loadLikes();
+    }
+  }, [isLoggedIn, token]);
+
+  const loadLikes = async () => {
+    if (!token) return;
+    
+    try {
+      // Carica i like dell'utente
+      const res = await fetch(`${API_URL}/characters/likes/my`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLikedCharacters(new Set(data.likedCharacters));
+      }
+
+      // Carica i count per ogni personaggio
+      const counts: { [key: string]: number } = {};
+      for (const char of allCharacters) {
+        try {
+          const countRes = await fetch(`${API_URL}/characters/${encodeURIComponent(char.name)}/like`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const countData = await countRes.json();
+          if (countData.success) {
+            counts[char.name] = countData.count;
+          }
+        } catch (error) {
+          console.error(`Errore caricamento like per ${char.name}:`, error);
+        }
+      }
+      setLikeCounts(counts);
+    } catch (error) {
+      console.error('Errore caricamento like:', error);
+    }
+  };
+
+  const handleLikeToggle = async (characterName: string) => {
+    if (!token || !isLoggedIn) return;
+
+    try {
+      const res = await fetch(`${API_URL}/characters/${encodeURIComponent(characterName)}/like`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const newLiked = new Set(likedCharacters);
+        if (data.liked) {
+          newLiked.add(characterName);
+        } else {
+          newLiked.delete(characterName);
+        }
+        setLikedCharacters(newLiked);
+        setLikeCounts({ ...likeCounts, [characterName]: data.count });
+      }
+    } catch (error) {
+      console.error('Errore toggle like:', error);
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ThemedView style={styles.background} lightColor="#FFFFFF" darkColor="#FFFFFF">
+        <View style={styles.header}>
+          <ThemedText type="title" style={styles.title}>
+            Personaggi
+          </ThemedText>
+          <View style={styles.searchContainer}>
+            <IconSymbol name="magnifyingglass" size={20} color="#666666" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Cerca personaggio o serie..."
+              placeholderTextColor="#999999"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <ThemedText style={styles.countText}>
+            {filteredCharacters.length} personaggi trovati
+          </ThemedText>
+
+          <View style={styles.cardsContainer}>
+            {filteredCharacters.map((character, index) => (
+              <CharacterCard
+                key={index}
+                name={character.name}
+                series={character.series}
+                difficulty={character.difficulty}
+                liked={likedCharacters.has(character.name)}
+                likeCount={likeCounts[character.name] || 0}
+                onLikePress={isLoggedIn ? () => handleLikeToggle(character.name) : undefined}
+                onPress={() => {
+                  // Navigazione al dettaglio personaggio
+                  console.log(`Apri dettaglio ${character.name}`);
+                }}
+              />
+            ))}
+          </View>
+        </ScrollView>
       </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
   },
-  titleContainer: {
+  background: {
+    flex: 1,
+  },
+  header: {
+    padding: 20,
+    paddingBottom: 12,
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 16,
+  },
+  searchContainer: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  searchIcon: {
+    opacity: 0.6,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#000000',
+    fontFamily: GlobalFont,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingTop: 0,
+    paddingBottom: 40,
+  },
+  countText: {
+    fontSize: 14,
+    color: '#000000',
+    opacity: 0.7,
+    marginBottom: 16,
+  },
+  cardsContainer: {
+    gap: 12,
   },
 });

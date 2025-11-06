@@ -1,36 +1,55 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Theme colors inspired by Nintendo - Rosso, Bianco e Nero
  */
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// Palette Nintendo ufficiale
+const nintendoRed = '#E60012'; // Rosso ufficiale del logo Nintendo
+const white = '#FFFFFF';
+const black = '#000000';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: black,
+    background: white,
+    surface: white,
+    tint: nintendoRed,
+    secondary: nintendoRed,
+    accent: nintendoRed,
+    icon: black,
+    tabIconDefault: '#666666',
+    tabIconSelected: nintendoRed,
+    gradient: {
+      start: nintendoRed,
+      end: '#B8000E', // Rosso più scuro per gradiente
+    },
+    card: white,
+    border: '#E0E0E0',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: white,
+    background: black,
+    surface: '#1A1A1A', // Grigio molto scuro per superficie
+    tint: nintendoRed,
+    secondary: nintendoRed,
+    accent: nintendoRed,
+    icon: white,
+    tabIconDefault: '#999999',
+    tabIconSelected: nintendoRed,
+    gradient: {
+      start: black,
+      end: '#1A1A1A', // Grigio scuro per gradiente
+    },
+    card: '#1A1A1A',
+    border: '#333333',
   },
 };
 
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
+    sans: 'Inter',
     /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
     /** iOS `UIFontDescriptorSystemDesignRounded` */
@@ -39,15 +58,23 @@ export const Fonts = Platform.select({
     mono: 'ui-monospace',
   },
   default: {
-    sans: 'normal',
+    sans: 'Inter',
     serif: 'serif',
     rounded: 'normal',
     mono: 'monospace',
   },
   web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    sans: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
     serif: "Georgia, 'Times New Roman', serif",
     rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
+});
+
+// Font globale da usare nell'app
+export const GlobalFont = Platform.select({
+  ios: 'System', // Usa il font di sistema iOS (San Francisco)
+  android: 'Roboto', // Roboto è il font di default su Android
+  default: 'System',
+  web: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
 });
